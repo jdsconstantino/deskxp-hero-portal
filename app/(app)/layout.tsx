@@ -1,23 +1,23 @@
-"use client"
+"use client";
 
-import { Fragment, ReactNode, useState } from "react"
-import Link from "next/link"
-import Image from "next/image"
-import { usePathname } from "next/navigation"
-import { Dialog, Transition } from "@headlessui/react"
+import { Fragment, ReactNode, useState } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { usePathname } from "next/navigation";
+import { Dialog, Transition } from "@headlessui/react";
 
 export default function AppLayout({ children }: { children: ReactNode }) {
-  const pathname = usePathname()
-  const [mobileOpen, setMobileOpen] = useState(false)
+  const pathname = usePathname();
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   const navItems = [
     { href: "/dashboard", label: "Dashboard" },
     { href: "/profile", label: "Profile" },
     { href: "/payroll", label: "Payroll" },
     { href: "/contracts", label: "Contracts" },
-  ]
+  ];
 
-  const Logo = () => (
+  const Logo = ({ variant = "desktop" }: { variant?: "desktop" | "mobile" }) => (
     <div className="flex items-center gap-3">
       <Image
         src="https://deskxp.com/assets/header-logo.png"
@@ -26,30 +26,53 @@ export default function AppLayout({ children }: { children: ReactNode }) {
         height={30}
         priority
       />
-      <span className="text-xs font-semibold tracking-wider text-[var(--accent)]">
-      </span>
+      <span
+        className={[
+          "text-xs font-semibold tracking-wider",
+          variant === "mobile" ? "text-white/70" : "text-[var(--accent)]",
+        ].join(" ")}
+      />
     </div>
-  )
+  );
 
-  const Nav = ({ onNavigate }: { onNavigate?: () => void }) => (
+  const Nav = ({
+    onNavigate,
+    variant = "desktop",
+  }: {
+    onNavigate?: () => void;
+    variant?: "desktop" | "mobile";
+  }) => (
     <nav className="flex-1 px-3 py-3 space-y-1 text-sm">
       {navItems.map((item) => {
-        const active = pathname === item.href
+        const active = pathname === item.href;
+
+        const activeClasses =
+          variant === "mobile"
+            ? "text-white bg-white/10 shadow-[0_10px_25px_rgba(0,0,0,0.35)]"
+            : "text-[var(--text)] bg-[var(--glass)] shadow-[0_10px_25px_rgba(0,0,0,0.25)]";
+
+        const inactiveClasses =
+          variant === "mobile"
+            ? "text-white/80 hover:bg-white/10 hover:text-white"
+            : "text-[var(--muted)] hover:bg-[var(--glass)]/70 hover:text-[var(--text)]";
+
         return (
           <Link
             key={item.href}
             href={item.href}
-            onClick={onNavigate}
+            onClick={() => {
+              onNavigate?.();
+            }}
             className={[
               "relative flex items-center rounded-2xl px-4 py-2.5 font-medium",
               "transition-all duration-200 ease-out",
-              "focus:outline-none focus:ring-2 focus:ring-[var(--glass-border)]/60",
-              active
-                ? "text-[var(--text)] bg-[var(--glass)] shadow-[0_10px_25px_rgba(0,0,0,0.25)]"
-                : "text-[var(--muted)] hover:bg-[var(--glass)]/70 hover:text-[var(--text)]",
+              variant === "mobile"
+                ? "focus:outline-none focus:ring-2 focus:ring-white/20"
+                : "focus:outline-none focus:ring-2 focus:ring-[var(--glass-border)]/60",
+              active ? activeClasses : inactiveClasses,
             ].join(" ")}
           >
-            {/* ACTIVE INDICATOR (forced visible) */}
+            {/* ACTIVE INDICATOR */}
             <span
               className={[
                 "absolute left-2 top-1/2 -translate-y-1/2 h-6 w-1 rounded-full",
@@ -57,8 +80,8 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                 active ? "opacity-100" : "opacity-0",
               ].join(" ")}
               style={{
-                background: "var(--accent, #007236)", // fallback green
-                boxShadow: "0 0 18px rgba(0,114,54,0.35)",
+                background: "var(--accent, #007236)",
+                boxShadow: "0 0 18px rgba(0,114,54,0.45)",
               }}
               aria-hidden="true"
             />
@@ -69,7 +92,9 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                 className="absolute inset-0 rounded-2xl pointer-events-none"
                 style={{
                   background:
-                    "linear-gradient(90deg, rgba(0,114,54,0.14) 0%, rgba(255,255,255,0) 55%)",
+                    variant === "mobile"
+                      ? "linear-gradient(90deg, rgba(0,114,54,0.22) 0%, rgba(255,255,255,0) 55%)"
+                      : "linear-gradient(90deg, rgba(0,114,54,0.14) 0%, rgba(255,255,255,0) 55%)",
                 }}
                 aria-hidden="true"
               />
@@ -77,16 +102,20 @@ export default function AppLayout({ children }: { children: ReactNode }) {
 
             <span className="pl-3 relative">{item.label}</span>
           </Link>
-        )
+        );
       })}
     </nav>
-  )
+  );
 
   return (
     <div className="min-h-screen flex bg-[#EEF3F1] text-zinc-900">
       {/* Mobile drawer */}
       <Transition.Root show={mobileOpen} as={Fragment}>
-        <Dialog as="div" className="relative z-50 md:hidden" onClose={setMobileOpen}>
+        <Dialog
+          as="div"
+          className="relative z-50 md:hidden"
+          onClose={setMobileOpen}
+        >
           <Transition.Child
             as={Fragment}
             enter="ease-out duration-200"
@@ -96,7 +125,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-            <div className="fixed inset-0 bg-black/45" />
+            <div className="fixed inset-0 bg-black/60" />
           </Transition.Child>
 
           <div className="fixed inset-0 overflow-hidden">
@@ -110,7 +139,14 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                 leaveFrom="translate-x-0"
                 leaveTo="-translate-x-full"
               >
-                <Dialog.Panel className="pointer-events-auto w-screen max-w-xs flex flex-col bg-[var(--panel)] relative">
+                <Dialog.Panel
+                  className={[
+                    "pointer-events-auto w-screen max-w-xs flex flex-col relative",
+                    "bg-[#0b141a]/95 backdrop-blur-xl",
+                    "border-r border-white/10",
+                    "shadow-[0_20px_80px_rgba(0,0,0,0.55)]",
+                  ].join(" ")}
+                >
                   {/* Glow divider */}
                   <div
                     className="absolute inset-y-0 right-0 w-[2px] opacity-90"
@@ -119,22 +155,22 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                         "linear-gradient(to bottom, transparent, rgba(95,167,199,0.45), transparent)",
                     }}
                   />
-                  <div className="absolute inset-y-0 right-0 w-6 pointer-events-none bg-gradient-to-r from-transparent to-black/10" />
+                  <div className="absolute inset-y-0 right-0 w-6 pointer-events-none bg-gradient-to-r from-transparent to-black/15" />
 
                   <div className="h-16 flex items-center justify-between px-5">
-                    <Logo />
+                    <Logo variant="mobile" />
                     <button
                       onClick={() => setMobileOpen(false)}
-                      className="rounded-lg px-2 py-1 text-sm text-[var(--muted)] hover:bg-[var(--glass)] hover:text-[var(--text)] transition"
+                      className="rounded-lg px-2 py-1 text-sm text-white/70 hover:bg-white/10 hover:text-white transition"
                       aria-label="Close menu"
                     >
                       ✕
                     </button>
                   </div>
 
-                  <Nav onNavigate={() => setMobileOpen(false)} />
+                  <Nav variant="mobile" onNavigate={() => setMobileOpen(false)} />
 
-                  <div className="p-4 text-xs text-[var(--muted)]">
+                  <div className="p-4 text-xs text-white/50">
                     hero.deskxp.com
                   </div>
                 </Dialog.Panel>
@@ -157,14 +193,12 @@ export default function AppLayout({ children }: { children: ReactNode }) {
         <div className="absolute inset-y-0 right-0 w-6 pointer-events-none bg-gradient-to-r from-transparent to-black/10" />
 
         <div className="h-16 flex items-center px-6">
-          <Logo />
+          <Logo variant="desktop" />
         </div>
 
-        <Nav />
+        <Nav variant="desktop" />
 
-        <div className="p-4 text-xs text-[var(--muted)]">
-          hero.deskxp.com
-        </div>
+        <div className="p-4 text-xs text-[var(--muted)]">hero.deskxp.com</div>
       </aside>
 
       {/* Main Area */}
@@ -190,5 +224,5 @@ export default function AppLayout({ children }: { children: ReactNode }) {
         </main>
       </div>
     </div>
-  )
+  );
 }

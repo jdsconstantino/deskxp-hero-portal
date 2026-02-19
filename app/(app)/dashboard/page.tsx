@@ -20,14 +20,20 @@ async function isAllowed(email: string) {
   return !!u && (u.status || "active").toLowerCase() === "active";
 }
 
-async function getAnnouncements(email: string) {
-  const base = process.env.APPS_SCRIPT_BASE_URL!;
-  const key = process.env.APPS_SCRIPT_KEY!;
-  const url = `${base}?path=announcements&key=${encodeURIComponent(
-    key
-  )}&email=${encodeURIComponent(email)}`;
+/* ---------------- Announcements via Cloudflare Worker ---------------- */
 
-  const res = await fetch(url, { cache: "no-store" });
+async function getAnnouncements(email: string) {
+  const base = process.env.WORKER_BASE_URL!;
+  const token = process.env.WORKER_TOKEN!;
+  const url = `${base}/api/announcements?email=${encodeURIComponent(email)}`;
+
+  const res = await fetch(url, {
+    cache: "no-store",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
   if (!res.ok) return [];
 
   const data = await res.json();
