@@ -15,11 +15,23 @@ async function isAllowed(email: string) {
   const data = await res.json();
   const users = (data?.users || []) as Array<{ email: string; status: string }>;
 
-  const u = users.find(
-    (x) => (x.email || "").toLowerCase() === email.toLowerCase()
-  );
+  const u = users.find((x) => (x.email || "").toLowerCase() === email.toLowerCase());
 
   return !!u && (u.status || "active").toLowerCase() === "active";
+}
+
+async function getAnnouncements(email: string) {
+  const base = process.env.APPS_SCRIPT_BASE_URL!;
+  const key = process.env.APPS_SCRIPT_KEY!;
+  const url = `${base}?path=announcements&key=${encodeURIComponent(
+    key
+  )}&email=${encodeURIComponent(email)}`;
+
+  const res = await fetch(url, { cache: "no-store" });
+  if (!res.ok) return [];
+
+  const data = await res.json();
+  return (data?.announcements || []) as Array<{ message: string }>;
 }
 
 /* ---------------- UI ---------------- */
@@ -55,8 +67,7 @@ function ModuleCard({
       <div className="p-5">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <div className="text-xs font-semibold tracking-wide text-zinc-500 uppercase">
-            </div>
+            <div className="text-xs font-semibold tracking-wide text-zinc-500 uppercase"></div>
             <div className="mt-1 text-lg font-semibold tracking-tight text-zinc-900">
               {title}
             </div>
@@ -121,6 +132,7 @@ export default async function Dashboard() {
   if (!allowed) redirect("/denied");
 
   const displayName = fullName || email;
+  const announcements = await getAnnouncements(email);
 
   return (
     <div className="space-y-6">
@@ -128,11 +140,11 @@ export default async function Dashboard() {
       <div
         className="rounded-3xl overflow-hidden"
         style={{
-          background: "linear-gradient(180deg, rgba(46,66,78,0.16) 0%, rgba(255,255,255,0.55) 55%, rgba(255,255,255,0.70) 100%)",
+          background:
+            "linear-gradient(180deg, rgba(46,66,78,0.16) 0%, rgba(255,255,255,0.55) 55%, rgba(255,255,255,0.70) 100%)",
           boxShadow: "0 18px 60px rgba(0,0,0,0.10)",
         }}
       >
-        {/* subtle inner glow */}
         <div
           className="px-7 py-7"
           style={{
@@ -162,11 +174,9 @@ export default async function Dashboard() {
           </div>
         </div>
 
-        {/* brand gradient footer strip */}
         <div className="h-10" style={{ background: "var(--accent-gradient)", opacity: 0.55 }} />
       </div>
 
-      {/* Main Grid */}
       <div className="grid gap-6 lg:grid-cols-12">
         {/* Left */}
         <div className="lg:col-span-8 space-y-6">
@@ -252,12 +262,20 @@ export default async function Dashboard() {
 
           <GlassPanel title="Announcements">
             <div className="space-y-3 text-sm text-zinc-600">
-              <div className="rounded-xl p-3 bg-white/70 border border-black/5">
-                Payroll updates will appear here once posted.
-              </div>
-              <div className="rounded-xl p-3 bg-white/70 border border-black/5">
-                Contracts module is the source of truth for agreements.
-              </div>
+              {announcements.length === 0 ? (
+                <div className="rounded-xl p-3 bg-white/70 border border-black/5">
+                  No announcements posted.
+                </div>
+              ) : (
+                announcements.slice(0, 5).map((a, idx) => (
+                  <div
+                    key={idx}
+                    className="rounded-xl p-3 bg-white/70 border border-black/5"
+                  >
+                    {a.message}
+                  </div>
+                ))
+              )}
             </div>
           </GlassPanel>
         </div>
