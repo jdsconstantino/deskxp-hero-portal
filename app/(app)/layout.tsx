@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Dialog, Transition } from "@headlessui/react";
+import { signOut } from "next-auth/react";
 
 export default function AppLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
@@ -72,7 +73,6 @@ export default function AppLayout({ children }: { children: ReactNode }) {
               active ? activeClasses : inactiveClasses,
             ].join(" ")}
           >
-            {/* ACTIVE INDICATOR */}
             <span
               className={[
                 "absolute left-2 top-1/2 -translate-y-1/2 h-6 w-1 rounded-full",
@@ -86,7 +86,6 @@ export default function AppLayout({ children }: { children: ReactNode }) {
               aria-hidden="true"
             />
 
-            {/* subtle active background tint */}
             {active && (
               <span
                 className="absolute inset-0 rounded-2xl pointer-events-none"
@@ -105,6 +104,28 @@ export default function AppLayout({ children }: { children: ReactNode }) {
         );
       })}
     </nav>
+  );
+
+  const LogoutButton = ({
+    variant = "desktop",
+    onAfter,
+  }: {
+    variant?: "desktop" | "mobile";
+    onAfter?: () => void;
+  }) => (
+    <button
+      onClick={() => {
+        onAfter?.();
+        signOut({ callbackUrl: "/" });
+      }}
+      className={
+        variant === "mobile"
+          ? "w-full rounded-2xl px-4 py-2.5 text-sm font-semibold text-white/90 bg-white/10 hover:bg-white/15 transition"
+          : "w-full rounded-2xl px-4 py-2.5 text-sm font-semibold text-[var(--text)] bg-[var(--glass)] hover:bg-[var(--glass)]/80 transition"
+      }
+    >
+      Logout
+    </button>
   );
 
   return (
@@ -147,7 +168,6 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                     "shadow-[0_20px_80px_rgba(0,0,0,0.55)]",
                   ].join(" ")}
                 >
-                  {/* Glow divider */}
                   <div
                     className="absolute inset-y-0 right-0 w-[2px] opacity-90"
                     style={{
@@ -168,11 +188,19 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                     </button>
                   </div>
 
-                  <Nav variant="mobile" onNavigate={() => setMobileOpen(false)} />
+                  <Nav
+                    variant="mobile"
+                    onNavigate={() => setMobileOpen(false)}
+                  />
 
-                  <div className="p-4 text-xs text-white/50">
-                    hero.deskxp.com
+                  <div className="px-4 pb-3">
+                    <LogoutButton
+                      variant="mobile"
+                      onAfter={() => setMobileOpen(false)}
+                    />
                   </div>
+
+                  <div className="p-4 text-xs text-white/50">hero.deskxp.com</div>
                 </Dialog.Panel>
               </Transition.Child>
             </div>
@@ -182,7 +210,6 @@ export default function AppLayout({ children }: { children: ReactNode }) {
 
       {/* Desktop sidebar */}
       <aside className="w-64 hidden md:flex flex-col bg-[var(--panel)] relative">
-        {/* Glow divider */}
         <div
           className="absolute inset-y-0 right-0 w-[2px] opacity-90"
           style={{
@@ -197,6 +224,10 @@ export default function AppLayout({ children }: { children: ReactNode }) {
         </div>
 
         <Nav variant="desktop" />
+
+        <div className="px-4 pb-3">
+          <LogoutButton variant="desktop" />
+        </div>
 
         <div className="p-4 text-xs text-[var(--muted)]">hero.deskxp.com</div>
       </aside>
@@ -216,7 +247,12 @@ export default function AppLayout({ children }: { children: ReactNode }) {
             <div className="font-medium tracking-tight">Hero Portal</div>
           </div>
 
-          <div className="text-sm text-zinc-500">Logged in</div>
+          <button
+            onClick={() => signOut({ callbackUrl: "/" })}
+            className="text-sm font-semibold text-[var(--accent)] hover:underline"
+          >
+            Logout
+          </button>
         </header>
 
         <main className="flex-1 p-4 md:p-6">
