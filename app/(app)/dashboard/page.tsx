@@ -10,6 +10,7 @@ import {
   Sparkles,
   ArrowRight,
   LogOut,
+  Megaphone,
 } from "lucide-react";
 
 /* ---------------- Allowlist Gate ---------------- */
@@ -300,9 +301,9 @@ export default async function Dashboard() {
               icon={<ShieldCheck className="h-3.5 w-3.5" />}
             />
             <StatChip
-              label="Announcements"
-              value={`${announcements.length}`}
-              icon={<Bell className="h-3.5 w-3.5" />}
+             label="Announcements"
+             value={`${announcements.length}`}
+              icon={<Megaphone className="h-3.5 w-3.5" />}
             />
             <StatChip
               label="Account"
