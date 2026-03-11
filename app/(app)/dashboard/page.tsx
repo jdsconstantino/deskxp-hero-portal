@@ -48,16 +48,28 @@ async function getAnnouncements(email: string) {
 
   console.log("ANNOUNCEMENTS STATUS:", res.status);
 
+  const raw = await res.text();
+  console.log("ANNOUNCEMENTS RAW BODY:", raw);
+
   if (!res.ok) {
-    const text = await res.text();
-    console.log("ANNOUNCEMENTS ERROR BODY:", text);
     return [];
   }
 
-  const data = await res.json();
-  console.log("ANNOUNCEMENTS RESPONSE:", JSON.stringify(data, null, 2));
+  let data: any = {};
+  try {
+    data = JSON.parse(raw);
+  } catch (e) {
+    console.log("ANNOUNCEMENTS JSON PARSE ERROR");
+    return [];
+  }
 
-  return (data?.announcements || []) as Array<{ message: string }>;
+  console.log("ANNOUNCEMENTS PARSED:", JSON.stringify(data));
+
+  if (Array.isArray(data)) return data;
+  if (Array.isArray(data?.announcements)) return data.announcements;
+  if (Array.isArray(data?.data)) return data.data;
+
+  return [];
 }
 
 /* ---------------- UI ---------------- */
