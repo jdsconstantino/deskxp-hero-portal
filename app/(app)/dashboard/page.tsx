@@ -92,9 +92,10 @@ function StatChip({
   icon?: React.ReactNode;
 }) {
   return (
-    <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-500">
-      <span className="inline-flex h-4 w-4 shrink-0 items-center justify-center">
-        {icon}
+    <div className="rounded-2xl border border-black/5 bg-white/70 px-4 py-3 backdrop-blur">
+      <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-500">
+        <span className="inline-flex h-4 w-4 shrink-0 items-center justify-center">
+          {icon}
         </span>
         <span>{label}</span>
       </div>
