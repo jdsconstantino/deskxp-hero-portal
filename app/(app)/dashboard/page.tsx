@@ -1,6 +1,16 @@
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import {
+  Wallet,
+  FileText,
+  UserCircle2,
+  Bell,
+  ShieldCheck,
+  Sparkles,
+  ArrowRight,
+  LogOut,
+} from "lucide-react";
 
 /* ---------------- Allowlist Gate ---------------- */
 
@@ -45,14 +55,17 @@ async function getAnnouncements(email: string) {
 function StatChip({
   label,
   value,
+  icon,
 }: {
   label: string;
   value: string;
+  icon?: React.ReactNode;
 }) {
   return (
     <div className="rounded-2xl border border-black/5 bg-white/70 px-4 py-3 backdrop-blur">
-      <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-500">
-        {label}
+      <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-500">
+        {icon}
+        <span>{label}</span>
       </div>
       <div className="mt-1 text-sm font-semibold text-zinc-900">{value}</div>
     </div>
@@ -62,30 +75,33 @@ function StatChip({
 function PrimaryAction({
   href,
   label,
+  icon,
   secondary = false,
 }: {
   href: string;
   label: string;
+  icon?: React.ReactNode;
   secondary?: boolean;
 }) {
   return (
     <Link
       href={href}
       className={[
-        "inline-flex items-center justify-center rounded-2xl px-4 py-3 text-sm font-semibold transition",
+        "inline-flex items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-semibold transition",
         secondary
           ? "border border-black/8 bg-white/80 text-zinc-800 hover:bg-white"
-          : "text-white shadow-[0_12px_30px_rgba(0,0,0,0.12)] hover:translate-y-[-1px]",
+          : "text-white shadow-[0_12px_30px_rgba(0,0,0,0.16)] hover:translate-y-[-1px]",
       ].join(" ")}
       style={
         secondary
           ? undefined
           : {
-              background: "var(--accent-gradient)",
+              background: "linear-gradient(135deg, #2f6f63 0%, #245348 100%)",
             }
       }
     >
-      {label}
+      {icon}
+      <span>{label}</span>
     </Link>
   );
 }
@@ -96,12 +112,14 @@ function ModuleCard({
   title,
   desc,
   cta,
+  icon,
 }: {
   href: string;
   eyebrow: string;
   title: string;
   desc: string;
   cta: string;
+  icon: React.ReactNode;
 }) {
   return (
     <Link
@@ -118,12 +136,13 @@ function ModuleCard({
         className="absolute inset-x-0 top-0 h-1.5"
         style={{ background: "var(--accent-gradient)" }}
       />
+
       <div className="p-6">
         <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-zinc-500">
           {eyebrow}
         </div>
 
-        <div className="mt-3 flex items-start justify-between gap-4">
+        <div className="mt-4 flex items-start justify-between gap-4">
           <div>
             <h3 className="text-xl font-semibold tracking-tight text-zinc-900">
               {title}
@@ -134,20 +153,21 @@ function ModuleCard({
           </div>
 
           <div
-            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl"
+            className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-[var(--accent)]"
             style={{
-              background: "var(--accent-radial)",
-              boxShadow: "var(--accent-shadow)",
+              background: "rgba(255,255,255,0.9)",
+              boxShadow: "0 10px 24px rgba(0,0,0,0.08)",
+              border: "1px solid rgba(0,0,0,0.05)",
             }}
             aria-hidden="true"
           >
-            <div className="h-2.5 w-2.5 rounded-full bg-[var(--accent)]" />
+            {icon}
           </div>
         </div>
 
         <div className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-[var(--accent)]">
           <span>{cta}</span>
-          <span className="transition group-hover:translate-x-0.5">→</span>
+          <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
         </div>
       </div>
     </Link>
@@ -196,7 +216,6 @@ export default async function Dashboard() {
 
   return (
     <div className="space-y-8">
-      {/* HERO */}
       <section
         className="relative overflow-hidden rounded-[32px] border border-white/50 px-6 py-6 sm:px-8 sm:py-8"
         style={{
@@ -225,23 +244,47 @@ export default async function Dashboard() {
             </p>
 
             <div className="mt-6 flex flex-wrap gap-3">
-              <PrimaryAction href="/payroll" label="Open payroll" />
-              <PrimaryAction href="/contracts" label="View contracts" secondary />
-              <PrimaryAction href="/profile" label="Manage profile" secondary />
+              <PrimaryAction
+                href="/payroll"
+                label="Open payroll"
+                icon={<Wallet className="h-4 w-4" />}
+              />
+              <PrimaryAction
+                href="/contracts"
+                label="View contracts"
+                icon={<FileText className="h-4 w-4" />}
+                secondary
+              />
+              <PrimaryAction
+                href="/profile"
+                label="Manage profile"
+                icon={<UserCircle2 className="h-4 w-4" />}
+                secondary
+              />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:min-w-[360px]">
-            <StatChip label="Access" value="Active" />
-            <StatChip label="Announcements" value={`${announcements.length}`} />
-            <StatChip label="Account" value="Ready" />
+            <StatChip
+              label="Access"
+              value="Active"
+              icon={<ShieldCheck className="h-3.5 w-3.5" />}
+            />
+            <StatChip
+              label="Announcements"
+              value={`${announcements.length}`}
+              icon={<Bell className="h-3.5 w-3.5" />}
+            />
+            <StatChip
+              label="Account"
+              value="Ready"
+              icon={<Sparkles className="h-3.5 w-3.5" />}
+            />
           </div>
         </div>
       </section>
 
-      {/* MAIN GRID */}
       <div className="grid gap-6 xl:grid-cols-12">
-        {/* LEFT */}
         <div className="space-y-6 xl:col-span-8">
           <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
             <ModuleCard
@@ -250,6 +293,7 @@ export default async function Dashboard() {
               title="Payroll"
               desc="View salary records, payout history, and your latest payroll details."
               cta="Open payroll"
+              icon={<Wallet className="h-5 w-5" />}
             />
             <ModuleCard
               href="/contracts"
@@ -257,6 +301,7 @@ export default async function Dashboard() {
               title="Contracts"
               desc="Review employment and service agreements available to your account."
               cta="Review contracts"
+              icon={<FileText className="h-5 w-5" />}
             />
             <ModuleCard
               href="/profile"
@@ -264,22 +309,38 @@ export default async function Dashboard() {
               title="Profile"
               desc="Update your employee details and keep your account information current."
               cta="Manage profile"
+              icon={<UserCircle2 className="h-5 w-5" />}
             />
           </div>
 
           <SectionCard title="Quick access">
             <div className="grid gap-3 sm:grid-cols-3">
               {[
-                { href: "/payroll", label: "Latest payroll" },
-                { href: "/contracts", label: "My contracts" },
-                { href: "/profile", label: "Edit profile" },
+                {
+                  href: "/payroll",
+                  label: "Latest payroll",
+                  icon: <Wallet className="h-4 w-4 text-[var(--accent)]" />,
+                },
+                {
+                  href: "/contracts",
+                  label: "My contracts",
+                  icon: <FileText className="h-4 w-4 text-[var(--accent)]" />,
+                },
+                {
+                  href: "/profile",
+                  label: "Edit profile",
+                  icon: <UserCircle2 className="h-4 w-4 text-[var(--accent)]" />,
+                },
               ].map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="rounded-2xl border border-black/5 bg-white/80 px-4 py-4 text-sm font-semibold text-zinc-800 transition hover:bg-white hover:shadow-sm"
+                  className="flex items-center gap-3 rounded-2xl border border-black/5 bg-white/80 px-4 py-4 text-sm font-semibold text-zinc-800 transition hover:bg-white hover:shadow-sm"
                 >
-                  {item.label}
+                  <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--accent)]/10">
+                    {item.icon}
+                  </span>
+                  <span>{item.label}</span>
                 </Link>
               ))}
             </div>
@@ -304,9 +365,12 @@ export default async function Dashboard() {
                 {announcements.slice(0, 5).map((a, idx) => (
                   <div
                     key={idx}
-                    className="rounded-2xl border border-black/5 bg-white/80 px-4 py-4 text-sm leading-6 text-zinc-700"
+                    className="flex items-start gap-3 rounded-2xl border border-black/5 bg-white/80 px-4 py-4 text-sm leading-6 text-zinc-700"
                   >
-                    {a.message}
+                    <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[var(--accent)]/10 text-[var(--accent)]">
+                      <Bell className="h-4 w-4" />
+                    </span>
+                    <div>{a.message}</div>
                   </div>
                 ))}
               </div>
@@ -314,21 +378,29 @@ export default async function Dashboard() {
           </SectionCard>
         </div>
 
-        {/* RIGHT */}
         <div className="space-y-6 xl:col-span-4">
           <SectionCard title="Your account">
             <div className="space-y-4">
               <div className="rounded-2xl border border-black/5 bg-white/80 p-4">
-                <div className="text-sm font-semibold text-zinc-900">
-                  {fullName || "—"}
+                <div className="flex items-start gap-3">
+                  <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[var(--accent)]/10 text-[var(--accent)]">
+                    <UserCircle2 className="h-5 w-5" />
+                  </span>
+
+                  <div className="min-w-0">
+                    <div className="text-sm font-semibold text-zinc-900">
+                      {fullName || "—"}
+                    </div>
+                    <div className="mt-1 break-all text-sm text-zinc-600">{email}</div>
+                  </div>
                 </div>
-                <div className="mt-1 break-all text-sm text-zinc-600">{email}</div>
               </div>
 
               <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
                 <div className="rounded-2xl border border-black/5 bg-white/80 px-4 py-3">
-                  <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-500">
-                    Access status
+                  <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-500">
+                    <ShieldCheck className="h-3.5 w-3.5" />
+                    <span>Access status</span>
                   </div>
                   <div className="mt-2 inline-flex items-center rounded-full bg-[var(--accent)]/10 px-2.5 py-1 text-xs font-semibold text-[var(--accent)]">
                     Active
@@ -336,8 +408,9 @@ export default async function Dashboard() {
                 </div>
 
                 <div className="rounded-2xl border border-black/5 bg-white/80 px-4 py-3">
-                  <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-500">
-                    Portal
+                  <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-500">
+                    <Sparkles className="h-3.5 w-3.5" />
+                    <span>Portal</span>
                   </div>
                   <div className="mt-1 text-sm font-semibold text-zinc-900">
                     Hero access enabled
@@ -347,9 +420,10 @@ export default async function Dashboard() {
 
               <Link
                 href="/api/auth/signout"
-                className="inline-flex items-center justify-center rounded-2xl border border-black/8 bg-white/80 px-4 py-3 text-sm font-semibold text-zinc-800 transition hover:bg-white"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-black/8 bg-white/80 px-4 py-3 text-sm font-semibold text-zinc-800 transition hover:bg-white"
               >
-                Sign out
+                <LogOut className="h-4 w-4" />
+                <span>Sign out</span>
               </Link>
             </div>
           </SectionCard>
