@@ -236,9 +236,13 @@ export default function PayrollClient({
   const safeRows = useMemo(() => rows || [], [rows]);
 
   function openDetails(r: AnyRecord) {
-    setSelected(r);
-    setOpen(true);
-  }
+  console.log("PAYROLL ROW OBJECT:", r);
+  console.log("total_php:", r.total_php);
+  console.log("ALL KEYS:", Object.keys(r));
+
+  setSelected(r);
+  setOpen(true);
+}
 
   function close() {
     setOpen(false);
