@@ -296,7 +296,7 @@ export default async function Dashboard() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:min-w-[360px]">
+          <div className="grid grid-cols-3 gap-3 w-full max-w-[420px]">
             <StatChip
               label="Access"
               value="Active"
