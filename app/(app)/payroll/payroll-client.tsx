@@ -46,8 +46,8 @@ function formatDateGMT8(input: any) {
     const dd = Number(mdy[2]);
     const yyyy = Number(mdy[3]);
     const monthNames = [
-      "January","February","March","April","May","June",
-      "July","August","September","October","November","December",
+      "January", "February", "March", "April", "May", "June",
+      "July", "August", "September", "October", "November", "December",
     ];
     if (yyyy && mm >= 1 && mm <= 12 && dd >= 1 && dd <= 31) {
       return `${String(dd).padStart(2, "0")} ${monthNames[mm - 1]} ${yyyy}`;
@@ -85,13 +85,6 @@ function formatMoneyPHP(v: any) {
     currency: "PHP",
     maximumFractionDigits: 0,
   }).format(n);
-}
-
-function formatNumber(v: any) {
-  if (v === null || v === undefined || v === "") return "—";
-  const n = Number(String(v).replace(/,/g, ""));
-  if (Number.isNaN(n)) return String(v);
-  return new Intl.NumberFormat("en-US", { maximumFractionDigits: 2 }).format(n);
 }
 
 function statusPillStyle(statusRaw: string) {
@@ -291,7 +284,6 @@ export default function PayrollClient({
                 key={key}
                 className="rounded-2xl border border-black/5 bg-white/60 px-4 py-4 flex items-center justify-between gap-4"
               >
-                {/* Col 1: Pay period */}
                 <div className="min-w-0">
                   <div className="text-sm font-semibold text-zinc-900 whitespace-normal break-words">
                     {period}
@@ -301,12 +293,10 @@ export default function PayrollClient({
                   </div>
                 </div>
 
-                {/* Col 2: Status */}
                 <div className="shrink-0">
                   <Pill text={status} />
                 </div>
 
-                {/* Col 3: Action */}
                 <div className="shrink-0">
                   <button
                     onClick={() => openDetails(r)}
@@ -326,7 +316,6 @@ export default function PayrollClient({
         </div>
       </GlassCard>
 
-      {/* Modal */}
       <Transition.Root show={open} as={Fragment}>
         <Dialog as="div" className="relative z-50" onClose={close}>
           <Transition.Child
@@ -388,7 +377,6 @@ export default function PayrollClient({
                   <div className="px-6 py-6 space-y-4">
                     {selected ? (
                       <>
-                        {/* Summary */}
                         <Section title="Summary">
                           <div className="divide-y divide-black/5">
                             <KV
@@ -396,46 +384,53 @@ export default function PayrollClient({
                               value={formatValue(getAny(selected, ["position"]))}
                             />
                             <KV
-                              label="Hours"
-                              value={formatValue(getAny(selected, ["hours"]))}
-                            />
-                            <KV
-                              label="Rate"
-                              value={formatNumber(getAny(selected, ["rate"]))}
-                            />
-                            <KV
-                              label="Conversion rate"
-                              value={formatNumber(
-                                getAny(selected, [
-                                  "conversion_rate",
-                                  "conversion rate",
-                                  "conversation_rate",
-                                  "conversation rate",
-                                ])
+                              label="Employment Type"
+                              value={formatValue(
+                                getAny(selected, ["employment_type", "employment type"])
                               )}
+                            />
+                            <KV
+                              label="Rate Type"
+                              value={formatValue(
+                                getAny(selected, ["rate_type", "rate type"])
+                              )}
+                            />
+                            <KV
+                              label="Weekly Rate"
+                              value={formatMoneyPHP(getAny(selected, ["rate"]))}
                             />
                           </div>
                         </Section>
 
-                        {/* Totals */}
                         <Section title="Totals">
                           <div className="divide-y divide-black/5">
                             <KV
-                              label="Total"
-                              value={formatNumber(getAny(selected, ["total"]))}
-                            />
-                            <KV
-                              label="Total PHP"
+                              label="Gross Payment"
                               value={formatMoneyPHP(
-                                getAny(selected, ["total_php", "total php"])
+                                getAny(selected, ["total_php", "total php", "total"])
                               )}
                             />
                             <KV
-                              label="Deduction"
-                              value={formatMoneyPHP(getAny(selected, ["deduction"]))}
+                              label="Deduction Reason"
+                              value={formatValue(
+                                getAny(selected, [
+                                  "deduction_description",
+                                  "deduction description",
+                                ])
+                              )}
                             />
                             <KV
-                              label="Net"
+                              label="Deduction Amount"
+                              value={formatMoneyPHP(
+                                getAny(selected, [
+                                  "deduction_amount",
+                                  "deduction amount",
+                                  "deduction",
+                                ])
+                              )}
+                            />
+                            <KV
+                              label="Net Payment"
                               value={formatMoneyPHP(
                                 getAny(selected, ["total_net", "total net", "net"])
                               )}
@@ -443,7 +438,6 @@ export default function PayrollClient({
                           </div>
                         </Section>
 
-                        {/* Payout */}
                         <Section title="Payout">
                           <div className="divide-y divide-black/5">
                             <KV
