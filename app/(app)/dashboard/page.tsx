@@ -42,13 +42,63 @@ async function getAnnouncements(email: string) {
 
 /* ---------------- UI ---------------- */
 
+function StatChip({
+  label,
+  value,
+}: {
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="rounded-2xl border border-black/5 bg-white/70 px-4 py-3 backdrop-blur">
+      <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-500">
+        {label}
+      </div>
+      <div className="mt-1 text-sm font-semibold text-zinc-900">{value}</div>
+    </div>
+  );
+}
+
+function PrimaryAction({
+  href,
+  label,
+  secondary = false,
+}: {
+  href: string;
+  label: string;
+  secondary?: boolean;
+}) {
+  return (
+    <Link
+      href={href}
+      className={[
+        "inline-flex items-center justify-center rounded-2xl px-4 py-3 text-sm font-semibold transition",
+        secondary
+          ? "border border-black/8 bg-white/80 text-zinc-800 hover:bg-white"
+          : "text-white shadow-[0_12px_30px_rgba(0,0,0,0.12)] hover:translate-y-[-1px]",
+      ].join(" ")}
+      style={
+        secondary
+          ? undefined
+          : {
+              background: "var(--accent-gradient)",
+            }
+      }
+    >
+      {label}
+    </Link>
+  );
+}
+
 function ModuleCard({
   href,
+  eyebrow,
   title,
   desc,
   cta,
 }: {
   href: string;
+  eyebrow: string;
   title: string;
   desc: string;
   cta: string;
@@ -57,30 +107,34 @@ function ModuleCard({
     <Link
       href={href}
       className={[
-        "group block rounded-2xl transition relative overflow-hidden",
-        "bg-white/70 backdrop-blur",
-        "border border-black/5",
-        "shadow-[0_10px_30px_rgba(0,0,0,0.06)]",
-        "hover:shadow-[var(--accent-shadow)] hover:-translate-y-[2px]",
-        "focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/30",
+        "group relative block overflow-hidden rounded-3xl border border-black/5",
+        "bg-white/78 backdrop-blur",
+        "shadow-[0_14px_40px_rgba(0,0,0,0.07)]",
+        "transition duration-200 hover:-translate-y-[2px] hover:shadow-[0_20px_50px_rgba(0,0,0,0.10)]",
+        "focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/25",
       ].join(" ")}
     >
       <div
-        className="absolute inset-x-0 top-0 h-1"
+        className="absolute inset-x-0 top-0 h-1.5"
         style={{ background: "var(--accent-gradient)" }}
       />
+      <div className="p-6">
+        <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-zinc-500">
+          {eyebrow}
+        </div>
 
-      <div className="p-5">
-        <div className="flex items-start justify-between gap-4">
+        <div className="mt-3 flex items-start justify-between gap-4">
           <div>
-            <div className="text-xs font-semibold tracking-wide text-zinc-500 uppercase"></div>
-            <div className="mt-1 text-lg font-semibold tracking-tight text-zinc-900">
+            <h3 className="text-xl font-semibold tracking-tight text-zinc-900">
               {title}
-            </div>
+            </h3>
+            <p className="mt-2 max-w-[34ch] text-sm leading-6 text-zinc-600">
+              {desc}
+            </p>
           </div>
 
           <div
-            className="h-10 w-10 rounded-xl flex items-center justify-center"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl"
             style={{
               background: "var(--accent-radial)",
               boxShadow: "var(--accent-shadow)",
@@ -91,10 +145,8 @@ function ModuleCard({
           </div>
         </div>
 
-        <p className="mt-2 text-sm text-zinc-600">{desc}</p>
-
-        <div className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-[var(--accent)]">
-          {cta}
+        <div className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-[var(--accent)]">
+          <span>{cta}</span>
           <span className="transition group-hover:translate-x-0.5">→</span>
         </div>
       </div>
@@ -102,26 +154,28 @@ function ModuleCard({
   );
 }
 
-function GlassPanel({
+function SectionCard({
   title,
+  action,
   children,
 }: {
   title: string;
+  action?: React.ReactNode;
   children: React.ReactNode;
 }) {
   return (
-    <div
-      className="rounded-2xl p-5"
+    <section
+      className="rounded-3xl border border-black/5 bg-white/74 p-6 backdrop-blur"
       style={{
-        background: "rgba(255,255,255,0.70)",
-        backdropFilter: "blur(10px)",
-        border: "1px solid rgba(0,0,0,0.05)",
-        boxShadow: "0 10px 30px rgba(0,0,0,0.06)",
+        boxShadow: "0 14px 40px rgba(0,0,0,0.07)",
       }}
     >
-      <div className="text-sm font-semibold text-zinc-900">{title}</div>
-      <div className="mt-3">{children}</div>
-    </div>
+      <div className="flex items-center justify-between gap-4">
+        <h2 className="text-base font-semibold text-zinc-900">{title}</h2>
+        {action}
+      </div>
+      <div className="mt-4">{children}</div>
+    </section>
   );
 }
 
@@ -141,149 +195,164 @@ export default async function Dashboard() {
   const announcements = await getAnnouncements(email);
 
   return (
-    <div className="space-y-6">
-      {/* HERO BANNER: no border, colored, floating */}
-      <div
-        className="rounded-3xl overflow-hidden"
+    <div className="space-y-8">
+      {/* HERO */}
+      <section
+        className="relative overflow-hidden rounded-[32px] border border-white/50 px-6 py-6 sm:px-8 sm:py-8"
         style={{
           background:
-            "linear-gradient(180deg, rgba(46,66,78,0.16) 0%, rgba(255,255,255,0.55) 55%, rgba(255,255,255,0.70) 100%)",
-          boxShadow: "0 18px 60px rgba(0,0,0,0.10)",
+            "linear-gradient(135deg, rgba(46,66,78,0.18) 0%, rgba(255,255,255,0.88) 50%, rgba(255,255,255,0.72) 100%)",
+          boxShadow: "0 20px 60px rgba(0,0,0,0.10)",
+          backdropFilter: "blur(12px)",
         }}
       >
-        <div
-          className="px-7 py-7"
-          style={{
-            backdropFilter: "blur(10px)",
-          }}
-        >
-          <div className="flex items-start justify-between gap-6">
-            <div>
-              <div className="text-xs font-semibold tracking-wide text-zinc-600 uppercase">
-                DeskXP Hero Portal
-              </div>
+        <div className="absolute right-0 top-0 h-40 w-40 rounded-full bg-[var(--accent)]/10 blur-3xl" />
+        <div className="absolute left-10 bottom-0 h-24 w-24 rounded-full bg-[var(--accent)]/10 blur-2xl" />
 
-              <h1 className="mt-2 text-3xl font-semibold tracking-tight text-zinc-900">
-                Welcome back, {displayName}
-              </h1>
-
-              <p className="mt-2 text-sm text-zinc-600">
-                Quick access to your profile, payroll, and contracts.
-              </p>
+        <div className="relative flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
+          <div className="max-w-3xl">
+            <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-600">
+              DeskXP Hero Portal
             </div>
 
-            <div className="hidden sm:flex items-center">
-              <span className="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold bg-[var(--accent)]/10 text-[var(--accent)]">
-                Access active
-              </span>
+            <h1 className="mt-3 text-3xl font-semibold tracking-tight text-zinc-900 sm:text-4xl">
+              Welcome back, {displayName}
+            </h1>
+
+            <p className="mt-3 max-w-2xl text-sm leading-6 text-zinc-600 sm:text-base">
+              Access your profile, payroll records, contracts, and company updates
+              in one place.
+            </p>
+
+            <div className="mt-6 flex flex-wrap gap-3">
+              <PrimaryAction href="/payroll" label="Open payroll" />
+              <PrimaryAction href="/contracts" label="View contracts" secondary />
+              <PrimaryAction href="/profile" label="Manage profile" secondary />
             </div>
           </div>
+
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:min-w-[360px]">
+            <StatChip label="Access" value="Active" />
+            <StatChip label="Announcements" value={`${announcements.length}`} />
+            <StatChip label="Account" value="Ready" />
+          </div>
         </div>
+      </section>
 
-        <div className="h-10" style={{ background: "var(--accent-gradient)", opacity: 0.55 }} />
-      </div>
-
-      <div className="grid gap-6 lg:grid-cols-12">
-        {/* Left */}
-        <div className="lg:col-span-8 space-y-6">
-          <div className="grid gap-6 md:grid-cols-2">
-            <ModuleCard
-              href="/profile"
-              title="Profile"
-              desc="View and manage your employee information."
-              cta="Open profile"
-            />
+      {/* MAIN GRID */}
+      <div className="grid gap-6 xl:grid-cols-12">
+        {/* LEFT */}
+        <div className="space-y-6 xl:col-span-8">
+          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
             <ModuleCard
               href="/payroll"
+              eyebrow="Finance"
               title="Payroll"
-              desc="Access salary records and payout history."
-              cta="View payroll"
+              desc="View salary records, payout history, and your latest payroll details."
+              cta="Open payroll"
             />
             <ModuleCard
               href="/contracts"
+              eyebrow="Documents"
               title="Contracts"
-              desc="Review employment and service agreements."
-              cta="View contracts"
+              desc="Review employment and service agreements available to your account."
+              cta="Review contracts"
+            />
+            <ModuleCard
+              href="/profile"
+              eyebrow="Account"
+              title="Profile"
+              desc="Update your employee details and keep your account information current."
+              cta="Manage profile"
             />
           </div>
 
-          <GlassPanel title="Quick actions">
-            <div className="flex flex-wrap gap-2">
+          <SectionCard title="Quick access">
+            <div className="grid gap-3 sm:grid-cols-3">
               {[
-                { href: "/profile", label: "Update profile" },
-                { href: "/payroll", label: "Check latest payroll" },
-                { href: "/contracts", label: "View contract" },
-              ].map((b) => (
+                { href: "/payroll", label: "Latest payroll" },
+                { href: "/contracts", label: "My contracts" },
+                { href: "/profile", label: "Edit profile" },
+              ].map((item) => (
                 <Link
-                  key={b.href}
-                  href={b.href}
-                  className="rounded-xl px-3 py-2 text-sm font-medium transition"
-                  style={{
-                    background: "rgba(255,255,255,0.70)",
-                    border: "1px solid rgba(0,0,0,0.06)",
-                  }}
+                  key={item.href}
+                  href={item.href}
+                  className="rounded-2xl border border-black/5 bg-white/80 px-4 py-4 text-sm font-semibold text-zinc-800 transition hover:bg-white hover:shadow-sm"
                 >
-                  {b.label}
+                  {item.label}
                 </Link>
               ))}
             </div>
-          </GlassPanel>
+          </SectionCard>
+
+          <SectionCard
+            title="Announcements"
+            action={
+              announcements.length > 0 ? (
+                <span className="rounded-full bg-[var(--accent)]/10 px-2.5 py-1 text-xs font-semibold text-[var(--accent)]">
+                  {announcements.length} update{announcements.length === 1 ? "" : "s"}
+                </span>
+              ) : null
+            }
+          >
+            {announcements.length === 0 ? (
+              <div className="rounded-2xl border border-dashed border-black/8 bg-white/60 px-4 py-5 text-sm text-zinc-500">
+                No announcements yet. Updates from DeskXP will appear here.
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {announcements.slice(0, 5).map((a, idx) => (
+                  <div
+                    key={idx}
+                    className="rounded-2xl border border-black/5 bg-white/80 px-4 py-4 text-sm leading-6 text-zinc-700"
+                  >
+                    {a.message}
+                  </div>
+                ))}
+              </div>
+            )}
+          </SectionCard>
         </div>
 
-        {/* Right rail */}
-        <div className="lg:col-span-4 space-y-6">
-          <GlassPanel title="Your status">
-            <div className="space-y-2 text-sm">
-              <div className="flex items-center justify-between">
-                <span className="text-zinc-500">Access</span>
-                <span className="inline-flex items-center rounded-full px-2 py-1 text-xs font-semibold bg-[var(--accent)]/10 text-[var(--accent)]">
-                  Active
-                </span>
-              </div>
-
-              <div className="flex items-center justify-between gap-3">
-                <span className="text-zinc-500">Name</span>
-                <span className="font-medium text-zinc-900 truncate max-w-[200px]">
+        {/* RIGHT */}
+        <div className="space-y-6 xl:col-span-4">
+          <SectionCard title="Your account">
+            <div className="space-y-4">
+              <div className="rounded-2xl border border-black/5 bg-white/80 p-4">
+                <div className="text-sm font-semibold text-zinc-900">
                   {fullName || "—"}
-                </span>
+                </div>
+                <div className="mt-1 break-all text-sm text-zinc-600">{email}</div>
               </div>
 
-              <div className="flex items-center justify-between gap-3">
-                <span className="text-zinc-500">Email</span>
-                <span className="font-medium text-zinc-900 truncate max-w-[200px]">
-                  {email}
-                </span>
-              </div>
-            </div>
+              <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
+                <div className="rounded-2xl border border-black/5 bg-white/80 px-4 py-3">
+                  <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-500">
+                    Access status
+                  </div>
+                  <div className="mt-2 inline-flex items-center rounded-full bg-[var(--accent)]/10 px-2.5 py-1 text-xs font-semibold text-[var(--accent)]">
+                    Active
+                  </div>
+                </div>
 
-            <div className="mt-4">
+                <div className="rounded-2xl border border-black/5 bg-white/80 px-4 py-3">
+                  <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-500">
+                    Portal
+                  </div>
+                  <div className="mt-1 text-sm font-semibold text-zinc-900">
+                    Hero access enabled
+                  </div>
+                </div>
+              </div>
+
               <Link
                 href="/api/auth/signout"
-                className="text-sm font-medium text-[var(--accent)] hover:underline"
+                className="inline-flex items-center justify-center rounded-2xl border border-black/8 bg-white/80 px-4 py-3 text-sm font-semibold text-zinc-800 transition hover:bg-white"
               >
                 Sign out
               </Link>
             </div>
-          </GlassPanel>
-
-          <GlassPanel title="Announcements">
-            <div className="space-y-3 text-sm text-zinc-600">
-              {announcements.length === 0 ? (
-                <div className="rounded-xl p-3 bg-white/70 border border-black/5">
-                  No announcements posted.
-                </div>
-              ) : (
-                announcements.slice(0, 5).map((a, idx) => (
-                  <div
-                    key={idx}
-                    className="rounded-xl p-3 bg-white/70 border border-black/5"
-                  >
-                    {a.message}
-                  </div>
-                ))
-              )}
-            </div>
-          </GlassPanel>
+          </SectionCard>
         </div>
       </div>
     </div>
