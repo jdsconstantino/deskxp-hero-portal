@@ -415,15 +415,6 @@ export default function PayrollClient({
                               )}
                             />
                             <KV
-                              label="Deduction Reason"
-                              value={formatValue(
-                                getAny(selected, [
-                                  "deduction_description",
-                                  "deduction description",
-                                ])
-                              )}
-                            />
-                            <KV
                               label="Deduction Amount"
                               value={formatMoneyPHP(
                                 getAny(selected, [
