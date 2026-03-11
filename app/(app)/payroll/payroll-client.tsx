@@ -407,7 +407,7 @@ export default function PayrollClient({
                             <KV
                               label="Gross Payment"
                               value={formatMoneyPHP(
-                                getAny(selected, ["total_php", "total php", "total"])
+                                getAny(selected, ["total_php"])
                               )}
                             />
                             <KV
