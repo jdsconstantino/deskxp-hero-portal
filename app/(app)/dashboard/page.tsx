@@ -301,9 +301,9 @@ export default async function Dashboard() {
               icon={<ShieldCheck className="h-3.5 w-3.5" />}
             />
             <StatChip
-             label="Announcements"
-             value={`${announcements.length}`}
-              icon={<Megaphone className="h-3.5 w-3.5" />}
+              label="Announcements"
+              value={`${announcements.length}`}
+              icon={<Bell className="h-4 w-4 text-[var(--accent)]" />}
             />
             <StatChip
               label="Account"
