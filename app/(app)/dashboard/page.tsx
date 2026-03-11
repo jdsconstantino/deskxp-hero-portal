@@ -37,6 +37,8 @@ async function getAnnouncements(email: string) {
   const token = process.env.WORKER_TOKEN!;
   const url = `${base}/api/announcements?email=${encodeURIComponent(email)}`;
 
+  console.log("ANNOUNCEMENTS URL:", url);
+
   const res = await fetch(url, {
     cache: "no-store",
     headers: {
@@ -44,9 +46,17 @@ async function getAnnouncements(email: string) {
     },
   });
 
-  if (!res.ok) return [];
+  console.log("ANNOUNCEMENTS STATUS:", res.status);
+
+  if (!res.ok) {
+    const text = await res.text();
+    console.log("ANNOUNCEMENTS ERROR BODY:", text);
+    return [];
+  }
 
   const data = await res.json();
+  console.log("ANNOUNCEMENTS RESPONSE:", JSON.stringify(data, null, 2));
+
   return (data?.announcements || []) as Array<{ message: string }>;
 }
 
