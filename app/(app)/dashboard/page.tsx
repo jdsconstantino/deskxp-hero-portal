@@ -384,7 +384,7 @@ export default async function Dashboard() {
               </div>
             ) : (
               <div className="space-y-3">
-                {announcements.slice(0, 5).map((a, idx) => (
+                {announcements.slice(0, 5).map((a: any, idx: number) => (
                   <div
                     key={idx}
                     className="flex items-start gap-3 rounded-2xl border border-black/5 bg-white/80 px-4 py-4 text-sm leading-6 text-zinc-700"
