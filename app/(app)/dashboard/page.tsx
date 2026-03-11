@@ -32,7 +32,14 @@ async function isAllowed(email: string) {
 
 /* ---------------- Announcements via Cloudflare Worker ---------------- */
 
-async function getAnnouncements(email: string) {
+type Announcement = {
+  message?: string;
+  title?: string;
+  body?: string;
+  content?: string;
+};
+
+async function getAnnouncements(email: string): Promise<Announcement[]> {
   const base = process.env.WORKER_BASE_URL!;
   const token = process.env.WORKER_TOKEN!;
   const url = `${base}/api/announcements?email=${encodeURIComponent(email)}`;
@@ -58,16 +65,16 @@ async function getAnnouncements(email: string) {
   let data: any = {};
   try {
     data = JSON.parse(raw);
-  } catch (e) {
+  } catch {
     console.log("ANNOUNCEMENTS JSON PARSE ERROR");
     return [];
   }
 
   console.log("ANNOUNCEMENTS PARSED:", JSON.stringify(data));
 
-  if (Array.isArray(data)) return data;
-  if (Array.isArray(data?.announcements)) return data.announcements;
-  if (Array.isArray(data?.data)) return data.data;
+  if (Array.isArray(data)) return data as Announcement[];
+  if (Array.isArray(data?.announcements)) return data.announcements as Announcement[];
+  if (Array.isArray(data?.data)) return data.data as Announcement[];
 
   return [];
 }
@@ -384,17 +391,26 @@ export default async function Dashboard() {
               </div>
             ) : (
               <div className="space-y-3">
-                {announcements.slice(0, 5).map((a: any, idx: number) => (
-                  <div
-                    key={idx}
-                    className="flex items-start gap-3 rounded-2xl border border-black/5 bg-white/80 px-4 py-4 text-sm leading-6 text-zinc-700"
-                  >
-                    <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[var(--accent)]/10 text-[var(--accent)]">
-                      <Bell className="h-4 w-4" />
-                    </span>
-                    <div>{a.message}</div>
-                  </div>
-                ))}
+                {announcements.slice(0, 5).map((a: Announcement, idx: number) => {
+                  const text =
+                    a.message ||
+                    a.title ||
+                    a.body ||
+                    a.content ||
+                    "Untitled announcement";
+
+                  return (
+                    <div
+                      key={idx}
+                      className="flex items-start gap-3 rounded-2xl border border-black/5 bg-white/80 px-4 py-4 text-sm leading-6 text-zinc-700"
+                    >
+                      <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[var(--accent)]/10 text-[var(--accent)]">
+                        <Bell className="h-4 w-4" />
+                      </span>
+                      <div>{text}</div>
+                    </div>
+                  );
+                })}
               </div>
             )}
           </SectionCard>
